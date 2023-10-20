@@ -1,0 +1,62 @@
+---
+# Setup Jenkins on a Fedora system.
+
+- name: create jenkins user
+  user:
+    name: "{{ user_name }}"
+    groups: root
+
+- name: add ssh key for jenkins
+  authorized_key:
+    user: "{{ user_name }}"
+    key: "{{ ssh_public_key }}"
+
+- name: add sudoers file for jenkins
+  copy:
+    src: 'sudoer_{{ user_name }}'
+    dest: '/etc/sudoers.d/{{ user_name }}'
+    owner: root
+    group: root
+    mode: 0440
+
+- name: update repo
+  ansible.builtin.get_url:
+    url: "{{ rpm_repo }}"
+    dest: /etc/yum.repos.d/jenkins.repo
+
+- name: import jenkins key
+  ansible.builtin.rpm_key:
+    state: present
+    key: "{{ rpm_key }}"
+
+- name: dnf update
+  ansible.builtin.dnf:
+    name: '*'
+    state: latest
+    update_cache: true
+
+- name: install java and jenkins
+  ansible.builtin.dnf:
+    name:
+      - fontconfig
+      - java-17-openjdk
+      - jenkins
+    state: latest
+
+- name: reload systemd config
+  ansible.builtin.systemd:
+    daemon_reload: true
+
+- name: start systemd jenkins
+  ansible.builtin.systemd:
+    name: jenkins.service
+    state: started
+    enabled: true
+
+- name: Allow httpd in firewalld
+  firewalld:
+    port: "8080/tcp"
+    permanent: true
+    state: enabled
+  when: ansible_distribution == "Fedora"
+  notify: firewalld reload
