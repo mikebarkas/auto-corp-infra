@@ -1,0 +1,9 @@
+---
+# Variables for Jenkins install
+
+user_name: jenkins
+ssh_public_key: "ssh_pubic_key_goes_here"
+
+rpm_repo: "https://pkg.jenkins.io/redhat-stable/jenkins.repo"
+rpm_key: "https://pkg.jenkins.io/redhat-stable/jenkins.io-2023.key"
+
