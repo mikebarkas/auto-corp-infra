@@ -8,7 +8,20 @@ variable "root_passwd" {
   type      = string
   sensitive = true
 }
-variable "public_key" {
+variable "instance_type" {
+  type = string
+}
+variable "instance_image" {
+  type = string
+}
+variable "instance_region" {
+  type = string
+}
+variable "linode_public_key" {
+  type      = string
+  sensitive = true
+}
+variable "ansible_public_key" {
   type      = string
   sensitive = true
 }
@@ -27,12 +40,12 @@ provider "linode" {
 }
 
 resource "linode_instance" "jenkins" {
-  image           = "linode/fedora38"
+  image           = var.instance_image
   label           = "Jenkins"
   group           = "Jenkins"
-  region          = "us-southeast"
-  type            = "g6-nanode-1"
-  authorized_keys = [var.public_key]
+  region          = var.instance_region
+  type            = var.instance_type
+  authorized_keys = [var.ansible_public_key]
   root_pass       = var.root_passwd
 }
 
