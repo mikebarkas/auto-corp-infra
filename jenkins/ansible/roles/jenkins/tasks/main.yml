@@ -1,24 +1,6 @@
 ---
 # Setup Jenkins on a Fedora system.
 
-- name: create jenkins user
-  user:
-    name: "{{ user_name }}"
-    groups: root
-
-- name: add ssh key for jenkins
-  authorized_key:
-    user: "{{ user_name }}"
-    key: "{{ ssh_public_key }}"
-
-- name: add sudoers file for jenkins
-  copy:
-    src: 'sudoer_{{ user_name }}'
-    dest: '/etc/sudoers.d/{{ user_name }}'
-    owner: root
-    group: root
-    mode: 0440
-
 - name: update repo
   ansible.builtin.get_url:
     url: "{{ rpm_repo }}"
@@ -35,12 +17,14 @@
     state: latest
     update_cache: true
 
-- name: install java and jenkins
+- name: install software
   ansible.builtin.dnf:
     name:
       - fontconfig
       - java-17-openjdk
       - jenkins
+      - git
+      - docker
     state: latest
 
 - name: reload systemd config
@@ -53,6 +37,12 @@
     state: started
     enabled: true
 
+- name: start systemd docker
+  ansible.builtin.systemd:
+    name: docker.service
+    state: started
+    enabled: true
+
 - name: Allow httpd in firewalld
   firewalld:
     port: "8080/tcp"
@@ -60,3 +50,52 @@
     state: enabled
   when: ansible_distribution == "Fedora"
   notify: firewalld reload
+
+- name: create jenkins user
+  user:
+    name: "{{ jenkins_name }}"
+    append: true
+    groups: ["docker"]
+    system: true
+
+- name: create admin user
+  tags: user,admin-user
+  user:
+    name: "{{ admin_name }}"
+    password: "{{ admin_passwd }}"
+    append: true
+    groups: ["wheel"]
+
+- name: add ssh key for admin
+  tags: user
+  authorized_key:
+    user: "{{ admin_name }}"
+    key: "{{ ssh_public_key }}"
+
+- name: add admin to sudoers
+  tags: user
+  community.general.sudoers:
+    name: admin-user
+    user: "{{ admin_name }}"
+    commands: ALL
+    nopassword: false
+
+- name: disable root ssh
+  tags: ssh
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^PermitRootLogin'
+    line: 'PermitRootLogin no'
+
+- name: disable passwd ssh
+  tags: ssh
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^PasswordAuthentication yes'
+    line: 'PasswordAuthentication no'
+
+- name: restart systemd sshd
+  tags: ssh
+  ansible.builtin.systemd:
+    name: sshd.service
+    state: restarted
