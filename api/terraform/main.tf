@@ -73,6 +73,13 @@ resource "aws_security_group" "auto-corp-sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
   ingress {
+    description = "HTTP"
+    from_port   = 8080
+    to_port     = 8080
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  ingress {
     description = "SSH"
     from_port   = 22
     to_port     = 22
@@ -118,6 +125,9 @@ resource "aws_eip" "auto-corp-eip" {
 
 # Create server instance
 resource "aws_instance" "auto-corp-api" {
+  # Fedora 38
+  # ami = "ami-01752495da7056fa9"
+
   # RHEL 9 -- x86-64
   # ami = "ami-026ebd4cfe2c043b2"
 
