@@ -56,8 +56,8 @@ resource "linode_firewall" "jenkins_server" {
 
   inbound {
     action   = "ACCEPT"
-    label    = "allow-http"
-    ports    = "8080"
+    label    = "allow-https"
+    ports    = "443"
     protocol = "TCP"
     ipv4     = ["0.0.0.0/0"]
     ipv6     = ["::/0"]
