@@ -17,5 +17,8 @@ nginx_config_dest: ""
 nginx_jenkins_config_src: ""
 nginx_jenkins_config_dest: ""
 
+sshd_config_src: "00-login-override.conf"
+sshd_config_dest: "/etc/ssh/sshd_config.d/"
+
 rpm_repo: "https://pkg.jenkins.io/redhat-stable/jenkins.repo"
 rpm_key: "https://pkg.jenkins.io/redhat-stable/jenkins.io-2023.key"

@@ -159,21 +159,15 @@
     commands: ALL
     nopassword: false
 
-- name: disable root ssh
+- name: sshd config - no root and passwd
   tags:
     - ssh
-  lineinfile:
-    path: /etc/ssh/sshd_config
-    regexp: '^PermitRootLogin'
-    line: 'PermitRootLogin no'
-
-- name: disable passwd ssh
-  tags:
-    - ssh
-  lineinfile:
-    path: /etc/ssh/sshd_config
-    regexp: '^PasswordAuthentication yes'
-    line: 'PasswordAuthentication no'
+  ansible.builtin.copy:
+    src: "{{ sshd_config_src }}"
+    dest: "{{ sshd_config_dest }}"
+    owner: root
+    group: root
+    mode: '0600'
 
 - name: restart systemd sshd
   tags:
