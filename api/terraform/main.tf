@@ -1,3 +1,20 @@
+variable "instance_type" {
+  type = string
+}
+
+variable "availability_zone" {
+  type = string
+}
+
+variable "key_name" {
+  type      = string
+  sensitive = true
+}
+
+variable "tag_name" {
+  type = string
+}
+
 provider "aws" {
   region = "us-east-1"
 }
@@ -7,7 +24,7 @@ resource "aws_vpc" "auto-corp-vpc" {
   cidr_block = "10.0.0.0/16"
 
   tags = {
-    Name = "auto-corp"
+    Name = var.tag_name
   }
 }
 
@@ -16,7 +33,7 @@ resource "aws_internet_gateway" "auto-corp-gateway" {
   vpc_id = aws_vpc.auto-corp-vpc.id
 
   tags = {
-    Name = "auto-corp"
+    Name = var.tag_name
   }
 
 }
@@ -31,7 +48,7 @@ resource "aws_route_table" "auto-corp-route-table" {
   }
 
   tags = {
-    Name = "auto-corp"
+    Name = var.tag_name
   }
 }
 
@@ -39,10 +56,10 @@ resource "aws_route_table" "auto-corp-route-table" {
 resource "aws_subnet" "auto-corp-subnet" {
   vpc_id            = aws_vpc.auto-corp-vpc.id
   cidr_block        = "10.0.1.0/24"
-  availability_zone = "us-east-1a"
+  availability_zone = var.availability_zone
 
   tags = {
-    Name = "auto-corp"
+    Name = "var.tag_name"
   }
 }
 
@@ -67,8 +84,8 @@ resource "aws_security_group" "auto-corp-sg" {
   }
   ingress {
     description = "HTTP"
-    from_port   = 80
-    to_port     = 80
+    from_port   = 8080
+    to_port     = 8080
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
@@ -88,7 +105,7 @@ resource "aws_security_group" "auto-corp-sg" {
   }
 
   tags = {
-    Name = "auto-corp"
+    Name = var.tag_name
   }
 }
 
@@ -99,7 +116,7 @@ resource "aws_network_interface" "auto-corp-nic" {
   security_groups = [aws_security_group.auto-corp-sg.id]
 
   tags = {
-    Name = "auto-corp"
+    Name = var.tag_name
   }
 }
 
@@ -112,12 +129,15 @@ resource "aws_eip" "auto-corp-eip" {
   depends_on = [aws_internet_gateway.auto-corp-gateway]
 
   tags = {
-    Name = "auto-corp"
+    Name = var.tag_name
   }
 }
 
 # Create server instance
 resource "aws_instance" "auto-corp-api" {
+  # Fedora 38
+  # ami = "ami-01752495da7056fa9"
+
   # RHEL 9 -- x86-64
   # ami = "ami-026ebd4cfe2c043b2"
 
@@ -126,9 +146,9 @@ resource "aws_instance" "auto-corp-api" {
 
   # Ubuntu 22.04 -- x86-64
   # ami = "ami-053b0d53c279acc90"
-  instance_type     = "t2.micro"
-  availability_zone = "us-east-1a"
-  key_name          = "LFS207"
+  instance_type     = var.instance_type
+  availability_zone = var.availability_zone
+  key_name          = var.key_name
 
   network_interface {
     device_index         = 0
@@ -136,7 +156,7 @@ resource "aws_instance" "auto-corp-api" {
   }
 
   tags = {
-    Name = "auto-corp"
+    Name = var.tag_name
   }
 }
 
