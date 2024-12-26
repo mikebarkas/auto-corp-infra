@@ -1,10 +1,38 @@
+variable "subscription_id" {
+  type = string
+}
+
+variable "registry_server" {
+  type = string
+}
+variable "registry_username" {
+  type = string
+}
+variable "registry_passwd" {
+  type = string
+}
+
+variable "container_name" {
+  type = string
+}
 variable "container_image" {
   type = string
 }
 
+terraform {
+  required_providers {
+    azurerm = {
+      source  = "hashicorp/azurerm"
+      version = "=4.4.0"
+    }
+  }
+}
+
+
 provider "azurerm" {
   features {}
-  skip_provider_registration = true
+  subscription_id = var.subscription_id
+  resource_providers_to_register = ["Microsoft.ContainerInstance"]
 }
 
 resource "azurerm_resource_group" "auto-corp-rg" {
@@ -17,11 +45,16 @@ resource "azurerm_container_group" "auto-corp-cg" {
   location            = azurerm_resource_group.auto-corp-rg.location
   resource_group_name = azurerm_resource_group.auto-corp-rg.name
   ip_address_type     = "Public"
-  dns_name_label      = "auto-corp-dns"
+  dns_name_label      = var.container_name
   os_type             = "Linux"
 
+  image_registry_credential {
+    server   = var.registry_server
+    username = var.registry_username
+    password = var.registry_passwd
+  }
   container {
-    name   = "auto-corp-web"
+    name   = var.container_name
     image  = var.container_image
     cpu    = "0.5"
     memory = "1.5"
@@ -31,5 +64,4 @@ resource "azurerm_container_group" "auto-corp-cg" {
       protocol = "TCP"
     }
   }
-
 }
