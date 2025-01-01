@@ -7,19 +7,14 @@ provider "aws" {
 resource "aws_vpc" "auto-corp-vpc" {
   cidr_block = "10.0.0.0/16"
 
-  tags = {
-    Name = var.tag_name
-  }
+  tags = var.tags
 }
 
 # Create Internet gateway
 resource "aws_internet_gateway" "auto-corp-gateway" {
   vpc_id = aws_vpc.auto-corp-vpc.id
 
-  tags = {
-    Name = var.tag_name
-  }
-
+  tags = var.tags
 }
 
 # Create custom route table
@@ -31,9 +26,7 @@ resource "aws_route_table" "auto-corp-route-table" {
     gateway_id = aws_internet_gateway.auto-corp-gateway.id
   }
 
-  tags = {
-    Name = var.tag_name
-  }
+  tags = var.tags
 }
 
 # Create a subnet
@@ -42,9 +35,7 @@ resource "aws_subnet" "auto-corp-subnet" {
   cidr_block        = "10.0.1.0/24"
   availability_zone = var.availability_zone
 
-  tags = {
-    Name = "var.tag_name"
-  }
+  tags = var.tags
 }
 
 # Associate subnet with route table
@@ -88,9 +79,7 @@ resource "aws_security_group" "auto-corp-sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags = {
-    Name = var.tag_name
-  }
+  tags = var.tags
 }
 
 # Create network interface with IP in the subnet
@@ -99,9 +88,7 @@ resource "aws_network_interface" "auto-corp-nic" {
   private_ips     = ["10.0.1.55"]
   security_groups = [aws_security_group.auto-corp-sg.id]
 
-  tags = {
-    Name = var.tag_name
-  }
+  tags = var.tags
 }
 
 # Assign Elastic IP to network interface
@@ -112,9 +99,7 @@ resource "aws_eip" "auto-corp-eip" {
   # The gateway must exist before the nic
   depends_on = [aws_internet_gateway.auto-corp-gateway]
 
-  tags = {
-    Name = var.tag_name
-  }
+  tags = var.tags
 }
 
 # Create server instance
@@ -139,9 +124,7 @@ resource "aws_instance" "auto-corp-api" {
     network_interface_id = aws_network_interface.auto-corp-nic.id
   }
 
-  tags = {
-    Name = var.tag_name
-  }
+  tags = var.tags
 }
 
 resource "aws_ec2_instance_state" "auto-corp-api" {

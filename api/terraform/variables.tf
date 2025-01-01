@@ -18,7 +18,7 @@ variable "key_name" {
   sensitive = true
 }
 
-variable "tag_name" {
+variable "tags" {
   description = "Tags to apply to the resource"
   type = map(string)
   default = {
