@@ -1,19 +1,3 @@
-variable "instance_type" {
-  type = string
-}
-
-variable "availability_zone" {
-  type = string
-}
-
-variable "key_name" {
-  type      = string
-  sensitive = true
-}
-
-variable "tag_name" {
-  type = string
-}
 
 provider "aws" {
   region = "us-east-1"
