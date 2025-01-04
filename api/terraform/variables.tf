@@ -22,6 +22,7 @@ variable "tags" {
   description = "Tags to apply to the resource"
   type = map(string)
   default = {
+    Name = "AutoCorp API"
     auto-corp = "demo"
   }
 }

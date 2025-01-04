@@ -91,19 +91,8 @@ resource "aws_network_interface" "auto-corp-nic" {
   tags = var.tags
 }
 
-# Assign Elastic IP to network interface
-resource "aws_eip" "auto-corp-eip" {
-  network_interface         = aws_network_interface.auto-corp-nic.id
-  associate_with_private_ip = "10.0.1.55"
-
-  # The gateway must exist before the nic
-  depends_on = [aws_internet_gateway.auto-corp-gateway]
-
-  tags = var.tags
-}
-
 # Create server instance
-resource "aws_instance" "auto-corp-api" {
+resource "aws_instance" "auto-corp-ec2" {
   # Fedora 38
   # ami = "ami-01752495da7056fa9"
 
@@ -128,6 +117,23 @@ resource "aws_instance" "auto-corp-api" {
 }
 
 resource "aws_ec2_instance_state" "auto-corp-api" {
-  instance_id = aws_instance.auto-corp-api.id
+  instance_id = aws_instance.auto-corp-ec2.id
   state       = "running"
+}
+
+# Assign Elastic IP to network interface
+resource "aws_eip" "auto-corp-eip" {
+  network_interface         = aws_network_interface.auto-corp-nic.id
+  associate_with_private_ip = "10.0.1.55"
+  instance = aws_instance.auto-corp-ec2.id
+
+  # The gateway must exist before the nic
+  depends_on = [aws_internet_gateway.auto-corp-gateway]
+
+  tags = var.tags
+}
+
+resource "aws_eip_association" "ip_assoc" {
+  instance_id = aws_instance.auto-corp-ec2.id
+  allocation_id = aws_eip.auto-corp-eip.id
 }
