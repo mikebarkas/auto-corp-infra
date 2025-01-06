@@ -1,23 +1,3 @@
-variable "subscription_id" {
-  type = string
-}
-
-variable "registry_server" {
-  type = string
-}
-variable "registry_username" {
-  type = string
-}
-variable "registry_passwd" {
-  type = string
-}
-
-variable "container_name" {
-  type = string
-}
-variable "container_image" {
-  type = string
-}
 
 terraform {
   required_providers {

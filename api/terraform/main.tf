@@ -1,19 +1,3 @@
-variable "instance_type" {
-  type = string
-}
-
-variable "availability_zone" {
-  type = string
-}
-
-variable "key_name" {
-  type      = string
-  sensitive = true
-}
-
-variable "tag_name" {
-  type = string
-}
 
 provider "aws" {
   region = "us-east-1"
@@ -23,19 +7,14 @@ provider "aws" {
 resource "aws_vpc" "auto-corp-vpc" {
   cidr_block = "10.0.0.0/16"
 
-  tags = {
-    Name = var.tag_name
-  }
+  tags = var.tags
 }
 
 # Create Internet gateway
 resource "aws_internet_gateway" "auto-corp-gateway" {
   vpc_id = aws_vpc.auto-corp-vpc.id
 
-  tags = {
-    Name = var.tag_name
-  }
-
+  tags = var.tags
 }
 
 # Create custom route table
@@ -47,9 +26,7 @@ resource "aws_route_table" "auto-corp-route-table" {
     gateway_id = aws_internet_gateway.auto-corp-gateway.id
   }
 
-  tags = {
-    Name = var.tag_name
-  }
+  tags = var.tags
 }
 
 # Create a subnet
@@ -58,9 +35,7 @@ resource "aws_subnet" "auto-corp-subnet" {
   cidr_block        = "10.0.1.0/24"
   availability_zone = var.availability_zone
 
-  tags = {
-    Name = "var.tag_name"
-  }
+  tags = var.tags
 }
 
 # Associate subnet with route table
@@ -104,9 +79,7 @@ resource "aws_security_group" "auto-corp-sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags = {
-    Name = var.tag_name
-  }
+  tags = var.tags
 }
 
 # Create network interface with IP in the subnet
@@ -115,26 +88,11 @@ resource "aws_network_interface" "auto-corp-nic" {
   private_ips     = ["10.0.1.55"]
   security_groups = [aws_security_group.auto-corp-sg.id]
 
-  tags = {
-    Name = var.tag_name
-  }
-}
-
-# Assign Elastic IP to network interface
-resource "aws_eip" "auto-corp-eip" {
-  network_interface         = aws_network_interface.auto-corp-nic.id
-  associate_with_private_ip = "10.0.1.55"
-
-  # The gateway must exist before the nic
-  depends_on = [aws_internet_gateway.auto-corp-gateway]
-
-  tags = {
-    Name = var.tag_name
-  }
+  tags = var.tags
 }
 
 # Create server instance
-resource "aws_instance" "auto-corp-api" {
+resource "aws_instance" "auto-corp-ec2" {
   # Fedora 38
   # ami = "ami-01752495da7056fa9"
 
@@ -155,12 +113,27 @@ resource "aws_instance" "auto-corp-api" {
     network_interface_id = aws_network_interface.auto-corp-nic.id
   }
 
-  tags = {
-    Name = var.tag_name
-  }
+  tags = var.tags
 }
 
 resource "aws_ec2_instance_state" "auto-corp-api" {
-  instance_id = aws_instance.auto-corp-api.id
+  instance_id = aws_instance.auto-corp-ec2.id
   state       = "running"
+}
+
+# Assign Elastic IP to network interface
+resource "aws_eip" "auto-corp-eip" {
+  network_interface         = aws_network_interface.auto-corp-nic.id
+  associate_with_private_ip = "10.0.1.55"
+  instance = aws_instance.auto-corp-ec2.id
+
+  # The gateway must exist before the nic
+  depends_on = [aws_internet_gateway.auto-corp-gateway]
+
+  tags = var.tags
+}
+
+resource "aws_eip_association" "ip_assoc" {
+  instance_id = aws_instance.auto-corp-ec2.id
+  allocation_id = aws_eip.auto-corp-eip.id
 }
