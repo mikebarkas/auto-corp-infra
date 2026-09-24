@@ -9,8 +9,8 @@ variable "zone_id" {
   type = string
 }
 
-variable "name" {
-  description = "The subdomain www"
+variable "api-name" {
+  description = "The subdomain for the api"
   type = string
 }
 
