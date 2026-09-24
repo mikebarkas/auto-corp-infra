@@ -1,24 +1,27 @@
-# Auto Corp Infrastructure
+# Auto Corp Infrastructure (archived)
 
-----
-This repo is used for practicing Infrastructure As Code concepts.
+> **This repository has moved to [mikebarkas/cloudlab](https://github.com/mikebarkas/cloudlab).**
+> The code and its full commit history now live in the [`autocorp/`](https://github.com/mikebarkas/cloudlab/tree/main/autocorp) directory.
+> This repository is archived and read-only. New work happens in cloudlab.
 
-Automobile Corporation is a fictitious company for this project to provide sample data.
+## Why it moved
 
-## Infrastructure Overview
+All of my AWS infrastructure projects are now in one repository, cloudlab, so they're easier to find, review, and maintain together.
 
-The back-end API runs in AWS.
+## What was here
 
-A front-end web app runs in Azure.
+Infrastructure as Code for Auto Corp, a practice project built around a fictitious automobile company:
 
-### Technologies
+- **Terraform** provisioned the AWS networking and EC2 host for the Go API, the web front end, and Cloudflare DNS records
+- **Ansible** configured the servers and deployed the containerized applications
+- **Jenkins** server setup
 
-Terraform builds the infrastructure
+Related application repositories:
 
-Ansible is used as needed for provisioning
+- [auto-corp-api](https://github.com/mikebarkas/auto-corp-api): Go API with Postgres
+- [auto-corp-web](https://github.com/mikebarkas/auto-corp-web): Python web front end
 
-Containers are used to run custom images for the applications
+## Release history
 
+Tags `0.0.1` through `0.0.8` remain in this repository for reference.
 
-----
-This project is for educational purposes only.
