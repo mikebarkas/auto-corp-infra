@@ -38,6 +38,9 @@ resource "azurerm_container_group" "auto-corp-cg" {
     image  = var.container_image
     cpu    = "0.5"
     memory = "1.5"
+    environment_variables = {
+      API_URL = var.api_url
+    }
 
     ports {
       port     = 8081

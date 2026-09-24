@@ -25,3 +25,8 @@ variable "container_image" {
   description = "The image to use in the container"
   type = string
 }
+
+variable "api_url" {
+  description = "An environment variable for the endpoint to the api"
+  type = string
+}
